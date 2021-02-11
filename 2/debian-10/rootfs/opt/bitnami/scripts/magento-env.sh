@@ -15,6 +15,9 @@ export BITNAMI_VOLUME_DIR="/bitnami"
 export MODULE="${MODULE:-magento}"
 export BITNAMI_DEBUG="${BITNAMI_DEBUG:-false}"
 
+# Load logging library
+. /opt/bitnami/scripts/liblog.sh
+
 # By setting an environment variable matching *_FILE to a file path, the prefixed environment
 # variable will be overridden with the value specified in that file
 magento_env_vars=(
@@ -72,8 +75,12 @@ magento_env_vars=(
 for env_var in "${magento_env_vars[@]}"; do
     file_env_var="${env_var}_FILE"
     if [[ -n "${!file_env_var:-}" ]]; then
-        export "${env_var}=$(< "${!file_env_var}")"
-        unset "${file_env_var}"
+        if [[ -r "${!file_env_var:-}" ]]; then
+            export "${env_var}=$(< "${!file_env_var}")"
+            unset "${file_env_var}"
+        else
+            warn "${!file_env_var:-} is not readable."
+        fi
     fi
 done
 unset magento_env_vars
