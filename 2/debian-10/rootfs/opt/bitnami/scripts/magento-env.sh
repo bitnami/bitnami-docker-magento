@@ -8,15 +8,15 @@
 # 3. Environment variables overridden via external files using *_FILE variables (see below)
 # 4. Environment variables set externally (i.e. current Bash context/Dockerfile/userdata)
 
+# Load logging library
+. /opt/bitnami/scripts/liblog.sh
+
 export BITNAMI_ROOT_DIR="/opt/bitnami"
 export BITNAMI_VOLUME_DIR="/bitnami"
 
 # Logging configuration
 export MODULE="${MODULE:-magento}"
 export BITNAMI_DEBUG="${BITNAMI_DEBUG:-false}"
-
-# Load logging library
-. /opt/bitnami/scripts/liblog.sh
 
 # By setting an environment variable matching *_FILE to a file path, the prefixed environment
 # variable will be overridden with the value specified in that file
@@ -79,7 +79,7 @@ for env_var in "${magento_env_vars[@]}"; do
             export "${env_var}=$(< "${!file_env_var}")"
             unset "${file_env_var}"
         else
-            warn "${!file_env_var:-} is not readable."
+            warn "Skipping export of '${env_var}'. '${!file_env_var:-}' is not readable."
         fi
     fi
 done
